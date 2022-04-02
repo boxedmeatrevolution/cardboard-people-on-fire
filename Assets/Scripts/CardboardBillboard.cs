@@ -170,10 +170,10 @@ public class CardboardBillboard : MonoBehaviour
 			texuv3d.Add(new Vector2(border_pos, 1.0f));
 		}
 		for (int i = 0; i < border_triangles.Length; ++i) {
-			triangles3d.Add(border_triangles[i]);
+			triangles3d.Add(border_triangles[border_triangles.Length - i - 1]);
 		}
 		for (int i = 0; i < border_triangles.Length; ++i) {
-			triangles3d.Add(border.Count + border_triangles[border_triangles.Length - i - 1]);
+			triangles3d.Add(border.Count + border_triangles[i]);
 		}
 		for (int i = 0; i < border.Count; ++i) {
 			triangles3d.Add((i + 1) % border.Count + 2 * border.Count);
@@ -190,6 +190,7 @@ public class CardboardBillboard : MonoBehaviour
 		mesh.SetVertices(points3d.ToArray());
 		mesh.SetTriangles(triangles3d.ToArray(), 0);
 		mesh.SetUVs(0, texuv3d.ToArray());
+		mesh.RecalculateNormals();
 
 		// Make the texture.
 		texture = new Texture2D(front.width + back.width, front.height + side.height, front.format, true);
