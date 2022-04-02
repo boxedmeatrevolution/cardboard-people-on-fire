@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(MeshFilter))]
+[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class CardboardBillboard : MonoBehaviour
 {
 	public Texture2D front;
@@ -11,6 +11,7 @@ public class CardboardBillboard : MonoBehaviour
 	public Texture2D side;
 
 	private Mesh mesh;
+	private Texture2D texture;
 	private float scale = 128.0f;
 	private float tightness = 0.5f;
 	private float thickness = 0.05f;
@@ -22,6 +23,7 @@ public class CardboardBillboard : MonoBehaviour
     {
 		CreateMesh();
 		GetComponent<MeshFilter>().mesh = mesh;
+		GetComponent<MeshRenderer>().material.mainTexture = texture;
 		if (front.width != back.width || front.height != back.height) {
 			throw new Exception ("CardboardBillboard: has different front and back sizes");
 		}
@@ -129,13 +131,27 @@ public class CardboardBillboard : MonoBehaviour
 		int[] border_triangles = triangulator.Triangulate();
 
 		// Make triangles for the two faces, then make triangles for the corrugated edge.
-		List<Vector3> points3d = new List<Vector3>(border.Count * 2);
+		float v_bottom = (float) front.height / (front.height + side.height);
+		List<Vector3> points3d = new List<Vector3>(border.Count * 4);
 		List<int> triangles3d = new List<int>(border_triangles.Length * 2 + border.Count * 6);
+		List<Vector2> texuv3d = new List<Vector2>(border.Count * 4);
 		for (int i = 0; i < border.Count; ++i) {
 			points3d.Add(new Vector3(border[i].x, border[i].y, 0.5f * thickness));
+			texuv3d.Add(new Vector2(0.5f * border[i].x / length_x, v_bottom * border[i].y / length_y));
 		}
 		for (int i = 0; i < border.Count; ++i) {
 			points3d.Add(new Vector3(border[i].x, border[i].y, -0.5f * thickness));
+			texuv3d.Add(new Vector2(0.5f + 0.5f * border[i].x / length_x, v_bottom * border[i].y / length_y));
+		}
+		for (int i = 0; i < border.Count; ++i) {
+			points3d.Add(new Vector3(border[i].x, border[i].y, 0.5f * thickness));
+			float border_pos = (float) i / (border.Count - 1);
+			texuv3d.Add(new Vector2(border_pos, v_bottom));
+		}
+		for (int i = 0; i < border.Count; ++i) {
+			points3d.Add(new Vector3(border[i].x, border[i].y, -0.5f * thickness));
+			float border_pos = (float) i / (border.Count - 1);
+			texuv3d.Add(new Vector2(border_pos, 1.0f));
 		}
 		for (int i = 0; i < border_triangles.Length; ++i) {
 			triangles3d.Add(border_triangles[i]);
@@ -144,17 +160,38 @@ public class CardboardBillboard : MonoBehaviour
 			triangles3d.Add(border.Count + border_triangles[i]);
 		}
 		for (int i = 0; i < border.Count; ++i) {
-			triangles3d.Add(i);
-			triangles3d.Add((i + 1) % border.Count);
-			triangles3d.Add(i + border.Count);
-			triangles3d.Add((i + 1) % border.Count + border.Count);
-			triangles3d.Add(i + border.Count);
-			triangles3d.Add((i + 1) % border.Count);
+			triangles3d.Add(i + 2 * border.Count);
+			triangles3d.Add((i + 1) % border.Count + 2 * border.Count);
+			triangles3d.Add(i + 3 * border.Count);
+			triangles3d.Add((i + 1) % border.Count + 3 * border.Count);
+			triangles3d.Add(i + 3 * border.Count);
+			triangles3d.Add((i + 1) % border.Count + 2 * border.Count);
 		}
+		Debug.Log("texuvcs: " + String.Join(", ", texuv3d.ToArray()));
 		Debug.Log("vertices: " + String.Join(", ", points3d.ToArray()));
 		Debug.Log("triangles: " + String.Join(", ", triangles3d.ToArray()));
 		mesh = new Mesh();
-		mesh.vertices = points3d.ToArray();
-		mesh.triangles = triangles3d.ToArray();
+		mesh.SetVertices(points3d.ToArray());
+		mesh.SetTriangles(triangles3d.ToArray(), 0);
+		mesh.SetUVs(0, texuv3d.ToArray());
+
+		// Make the texture.
+		texture = new Texture2D(front.width + back.width, front.height + side.height, front.format, true);
+		if (back.format != front.format) {
+			throw new Exception("CardboardBillboard: back has different texture format");
+		}
+		if (side.format != front.format) {
+			throw new Exception("CardboardBillboard: side has different texture format");
+		}
+		Graphics.CopyTexture(front, 0, 0, 0, 0, front.width, front.height, texture, 0, 0, 0, 0);
+		Graphics.CopyTexture(back, 0, 0, 0, 0, back.width, back.height, texture, 0, 0, front.width, 0);
+		int side_coord = 0;
+		while (side_coord < front.width + back.width) {
+			int pix_remaining = front.width + back.width - side_coord;
+			int pix_available = side.width;
+			Graphics.CopyTexture(side, 0, 0, 0, 0, Mathf.Min(pix_remaining, pix_available), side.height, texture, 0, 0, side_coord, front.height);
+			side_coord += Mathf.Min(pix_remaining, pix_available);
+		}
+		texture.Apply(true, true);
 	}
 }
