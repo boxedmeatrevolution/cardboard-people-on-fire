@@ -14,7 +14,7 @@ public class CardboardBillboard : MonoBehaviour
 	private Texture2D texture;
 	private float scale = 128.0f;
 	private float tightness = 0.5f;
-	private float thickness = 0.05f;
+	private float thickness = 0.15f;
 	private float deformation = 0.5f;
 	private float threshold = 0.1f;
 
@@ -100,6 +100,9 @@ public class CardboardBillboard : MonoBehaviour
 		// Follow the border around, to make a loop.
 		List<int> border_idx = new List<int>();
 		border_idx.Add(border_start_idx);
+		float total_rotation = 0.0f;
+		float first_rotation = 0.0f;
+		float last_rotation = 0.0f / 0.0f;
 		do {
 			int last_last_idx = border_idx.Count > 1 ? border_idx[border_idx.Count - 2] : -1;
 			int last_idx = border_idx[border_idx.Count - 1];
@@ -115,6 +118,13 @@ public class CardboardBillboard : MonoBehaviour
 					int neighbour_idx = test_x + test_y * num_points_x;
 					if (neighbour_idx != last_idx && neighbour_idx != last_last_idx && occupied[neighbour_idx] == 2) {
 						border_idx.Add(neighbour_idx);
+						float rotation = Mathf.Atan2(diff_y, diff_x);
+						if (!float.IsNaN(last_rotation)) {
+							total_rotation += Mathf.Repeat(rotation - last_rotation + Mathf.PI, 2.0f * Mathf.PI) - Mathf.PI;
+						} else {
+							first_rotation = rotation;
+						}
+						last_rotation = rotation;
 						goto FoundNeighbour;
 					}
 				}
@@ -122,6 +132,12 @@ public class CardboardBillboard : MonoBehaviour
 			FoundNeighbour:
 			;
 		} while (border_idx[0] != border_idx[border_idx.Count - 1]);
+		total_rotation += Mathf.Repeat(first_rotation - last_rotation + Mathf.PI, 2.0f * Mathf.PI) - Mathf.PI;
+		Debug.Log("total rotation: " + total_rotation.ToString());
+		if (total_rotation < 0.0f) {
+			Debug.Log("REVERSED!");
+			border_idx.Reverse();
+		}
 		List<Vector2> border = new List<Vector2>(border_idx.Count - 1);
 		for (int i = 0; i < border_idx.Count - 1; ++i) {
 			border.Add(points[border_idx[i]]);
@@ -157,14 +173,14 @@ public class CardboardBillboard : MonoBehaviour
 			triangles3d.Add(border_triangles[i]);
 		}
 		for (int i = 0; i < border_triangles.Length; ++i) {
-			triangles3d.Add(border.Count + border_triangles[i]);
+			triangles3d.Add(border.Count + border_triangles[border_triangles.Length - i - 1]);
 		}
 		for (int i = 0; i < border.Count; ++i) {
-			triangles3d.Add(i + 2 * border.Count);
 			triangles3d.Add((i + 1) % border.Count + 2 * border.Count);
+			triangles3d.Add(i + 2 * border.Count);
+			triangles3d.Add(i + 3 * border.Count);
 			triangles3d.Add(i + 3 * border.Count);
 			triangles3d.Add((i + 1) % border.Count + 3 * border.Count);
-			triangles3d.Add(i + 3 * border.Count);
 			triangles3d.Add((i + 1) % border.Count + 2 * border.Count);
 		}
 		Debug.Log("texuvcs: " + String.Join(", ", texuv3d.ToArray()));
