@@ -18,10 +18,11 @@ public class CardboardBillboard : MonoBehaviour
 	private Mesh mesh;
 	private Texture2D texture;
 	private float scale = 128.0f;
-	private float density = 4.0f;
+	private float density = 3.0f;
 	private float margin = 0.2f;
 	private float push_factor = 1.0f;
-	private float smoothing = 0.5f;
+	private float smoothing = 0.15f;
+	private int smoothing_iterations = 3;
 	private float thickness = 0.15f;
 	private float deformation = 0.5f;
 	private float alpha_threshold = 0.1f;
@@ -98,6 +99,8 @@ public class CardboardBillboard : MonoBehaviour
 				// Fill in border points.
 				int left_idx = (idx_x - 1) + idx_y * num_points_x;
 				int down_idx = idx_x + (idx_y - 1) * num_points_x;
+				//int down_left_idx = (idx_x - 1) + (idx_y - 1) * num_points_x;
+				//int down_right_idx = (idx_x + 1) + (idx_y - 1) * num_points_x;
 				if (occupied[idx] == 1) {
 					if (occupied[left_idx] == 0) {
 						occupied[left_idx] = 2;
@@ -105,6 +108,14 @@ public class CardboardBillboard : MonoBehaviour
 					if (occupied[down_idx] == 0) {
 						occupied[down_idx] = 2;
 					}
+					/*
+					if (occupied[down_left_idx] == 0) {
+						occupied[down_left_idx] = 2;
+					}
+					if (occupied[down_right_idx] == 0) {
+						occupied[down_right_idx] = 2;
+					}
+					*/
 				} else if (occupied[idx] == 0) {
 					if (idx_x > 0 && occupied[left_idx] == 1) {
 						occupied[idx] = 2;
@@ -112,6 +123,14 @@ public class CardboardBillboard : MonoBehaviour
 					if (idx_y > 0 && occupied[down_idx] == 1) {
 						occupied[idx] = 2;
 					}
+					/*
+					if (idx_x > 0 && idx_y > 0 && occupied[down_left_idx] == 1) {
+						occupied[idx] = 2;
+					}
+					if (idx_x < num_points_x - 1 && idx_y > 0 && occupied[down_right_idx] == 1) {
+						occupied[idx] = 2;
+					}
+					*/
 				}
 			}
 		}
@@ -138,6 +157,7 @@ public class CardboardBillboard : MonoBehaviour
 		do {
 			int last_last_idx = border_idx.Count > 1 ? border_idx[border_idx.Count - 2] : -1;
 			int last_idx = border_idx[border_idx.Count - 1];
+			occupied[last_idx] = 3;
 			int last_y = last_idx / num_points_x;
 			int last_x = last_idx % num_points_x;
 			bool found_neighbour = false;
@@ -148,9 +168,10 @@ public class CardboardBillboard : MonoBehaviour
 				new Tuple<int, int>( 0,+1),
 				new Tuple<int, int>(-1,-1),
 				new Tuple<int, int>(+1,+1),
-				new Tuple<int, int>(-1,+1),
-				new Tuple<int, int>(+1,-1)
+				new Tuple<int, int>(+1,-1),
+				new Tuple<int, int>(-1,+1)
 			};
+			Debug.Log("border idx: " + String.Join(", ", border_idx.ToArray()));
 			foreach (Tuple<int, int> diff in diffs) {
 				int diff_x = diff.Item1;
 				int diff_y = diff.Item2;
@@ -160,7 +181,7 @@ public class CardboardBillboard : MonoBehaviour
 					continue;
 				}
 				int neighbour_idx = test_x + test_y * num_points_x;
-				if (neighbour_idx != last_idx && neighbour_idx != last_last_idx && occupied[neighbour_idx] == 2) {
+				if (occupied[neighbour_idx] == 2) {
 					border_idx.Add(neighbour_idx);
 					float rotation = Mathf.Atan2(diff_y, diff_x);
 					if (!float.IsNaN(last_rotation)) {
@@ -175,13 +196,34 @@ public class CardboardBillboard : MonoBehaviour
 			}
 			FoundNeighbour:
 			if (!found_neighbour) {
-				throw new Exception("CardboardBillboard: couldn't find neighbour");
+				int a_idx = border_idx[border_idx.Count - 1];
+				int a_y = a_idx / num_points_x;
+				int a_x = a_idx % num_points_x;
+				int b_idx = border_idx[0];
+				int b_y = b_idx / num_points_x;
+				int b_x = b_idx % num_points_x;
+				if (Mathf.Abs(a_x - b_x) <= 1 && Mathf.Abs(a_y - b_y) <= 1) {
+					float rotation = Mathf.Atan2(b_y - a_y, a_x - b_x);
+					if (!float.IsNaN(last_rotation)) {
+						total_rotation += Mathf.Repeat(rotation - last_rotation + Mathf.PI, 2.0f * Mathf.PI) - Mathf.PI;
+					} else {
+						first_rotation = rotation;
+					}
+					last_rotation = rotation;
+					break;
+				}
+				border_idx.RemoveAt(border_idx.Count - 1);
+				if (border_idx.Count == 0) {
+					throw new Exception("CardboardBillboard: ran out of idxs");
+				}
+				Debug.Log("backtracking");
+				//throw new Exception("CardboardBillboard: couldn't find neighbour");
 			}
-		} while (border_idx[0] != border_idx[border_idx.Count - 1]);
+		} while (true);
 		total_rotation += Mathf.Repeat(first_rotation - last_rotation + Mathf.PI, 2.0f * Mathf.PI) - Mathf.PI;
 		Debug.Log("total rotation: " + total_rotation.ToString());
-		List<Vector2> border = new List<Vector2>(border_idx.Count - 1);
-		for (int i = 0; i < border_idx.Count - 1; ++i) {
+		List<Vector2> border = new List<Vector2>(border_idx.Count);
+		for (int i = 0; i < border_idx.Count; ++i) {
 			border.Add(points[border_idx[i]]);
 		}
 		if (total_rotation < 0.0f) {
@@ -190,6 +232,19 @@ public class CardboardBillboard : MonoBehaviour
 		}
 
 		List<Vector2> border_smoothed = new List<Vector2>();
+		
+		// Smooth the border.
+		for (int j = 0; j < smoothing_iterations; ++j) {
+			border_smoothed = new List<Vector2>(border.Count);
+			for (int i = 0; i < border.Count; ++i) {
+				Vector2 point = border[i];
+				Vector2 point_next = border[(i + 1) % border.Count];
+				Vector2 point_prev = border[i == 0 ? border.Count - 1 : i - 1];
+				Vector2 point_avg = 0.5f * (point_next + point_prev);
+				border_smoothed.Add(smoothing * point_avg + (1.0f - smoothing) * point);
+			}
+			border = border_smoothed;
+		}
 
 		// Push edges out.
 		border_smoothed = new List<Vector2>(border.Count);
@@ -205,15 +260,17 @@ public class CardboardBillboard : MonoBehaviour
 		border = border_smoothed;
 		
 		// Smooth the border.
-		border_smoothed = new List<Vector2>(border.Count);
-		for (int i = 0; i < border.Count; ++i) {
-			Vector2 point = border[i];
-			Vector2 point_next = border[(i + 1) % border.Count];
-			Vector2 point_prev = border[i == 0 ? border.Count - 1 : i - 1];
-			Vector2 point_avg = 0.5f * (point_next + point_prev);
-			border_smoothed.Add(smoothing * point_avg + (1.0f - smoothing) * point);
+		for (int j = 0; j < smoothing_iterations; ++j) {
+			border_smoothed = new List<Vector2>(border.Count);
+			for (int i = 0; i < border.Count; ++i) {
+				Vector2 point = border[i];
+				Vector2 point_next = border[(i + 1) % border.Count];
+				Vector2 point_prev = border[i == 0 ? border.Count - 1 : i - 1];
+				Vector2 point_avg = 0.5f * (point_next + point_prev);
+				border_smoothed.Add(smoothing * point_avg + (1.0f - smoothing) * point);
+			}
+			border = border_smoothed;
 		}
-		border = border_smoothed;
 
 		// Scale down.
 		Vector2 center_of_mass = new Vector2(0.0f, 0.0f);
