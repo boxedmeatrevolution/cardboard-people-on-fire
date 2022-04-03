@@ -51,7 +51,7 @@ public class CardboardBillboard : MonoBehaviour
 		*/
 		GetComponent<MeshFilter>().mesh = mesh;
 		Material paint_mod = new Material(paint);
-		paint.mainTexture = texture;
+		paint_mod.mainTexture = texture;
 		GetComponent<MeshRenderer>().materials = new Material[] {
 			cardboard,
 			paint_mod
@@ -301,7 +301,7 @@ public class CardboardBillboard : MonoBehaviour
 		texture = new Texture2D(front.width + back.width + 4 * padding, front.height + side.height + 2 * padding, TextureFormat.RGBA32, true);
 		Color[] pixels = texture.GetPixels();
 		for (int i = 0; i < pixels.Length; ++i) {
-			pixels[i] = new Color(0.0f, 0.0f, 0.0f, 1.0f);
+			pixels[i] = Color.clear;
 		}
 		texture.SetPixels(pixels);
 		if (front.format != texture.format) {
