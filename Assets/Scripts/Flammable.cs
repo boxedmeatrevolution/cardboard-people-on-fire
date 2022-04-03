@@ -7,7 +7,7 @@ public class Flammable : MonoBehaviour
 	public float heat = 0.0f;
 	public float cooldown_time = 4.0f;
 	public float heatup_time = 4.0f;
-	public float threshold_distance = 2.0f;
+	public float threshold_distance = 3.0f;
 	public bool on_fire = false;
 	public GameObject effect;
 
@@ -17,7 +17,7 @@ public class Flammable : MonoBehaviour
     {
         flammables.Add(this);
 		if (flammables.Count == 1) {
-			//on_fire = true;
+			on_fire = true;
 		}
 		if (!on_fire) {
 			effect.GetComponent<ParticleSystem>().Stop();
