@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8134802948810870477}
   - component: {fileID: 3374139721166368945}
   - component: {fileID: 2194520705710537162}
+  - component: {fileID: 1136147820833698033}
   m_Layer: 0
   m_Name: TrafficCone
   m_TagString: Untagged
@@ -46,9 +47,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64495dea3739783309c8ddad0fbd5292, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  front: {fileID: 2800000, guid: 1c2beb64dca60be7194dd456d7f933fa, type: 3}
-  back: {fileID: 2800000, guid: 1c2beb64dca60be7194dd456d7f933fa, type: 3}
+  mask: {fileID: 2800000, guid: cd8da4d44542a711db57452a30faaad0, type: 3}
+  front: {fileID: 2800000, guid: bb76cb4ca072678dea28cd0905a38bdb, type: 3}
+  back: {fileID: 2800000, guid: dc2e83088aec3a206bce1874683d5d38, type: 3}
   side: {fileID: 2800000, guid: 51651e64a92575fa4a62c809264e88ac, type: 3}
+  stick: {fileID: 145302055271586708, guid: a6f6033b39154852b8e6908a38da8bfc, type: 3}
   cardboard: {fileID: 2100000, guid: f92c3cbc48a0498f6b00f145b6ca30ff, type: 2}
   paint: {fileID: 2100000, guid: 3cb2bbfeaa550375ca9a5e38306db033, type: 2}
 --- !u!23 &3374139721166368945
@@ -101,3 +104,16 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4365345966888547487}
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1136147820833698033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4365345966888547487}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cee229dfaa932dd458747f8235f97bf0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  turn_time: 0.3
