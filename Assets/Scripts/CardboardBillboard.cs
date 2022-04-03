@@ -12,6 +12,9 @@ public class CardboardBillboard : MonoBehaviour
 	public Texture2D back;
 	public Texture2D side;
 
+	public Material cardboard;
+	public Material paint;
+
 	private Mesh mesh;
 	private Texture2D texture;
 	private float scale = 128.0f;
@@ -47,7 +50,12 @@ public class CardboardBillboard : MonoBehaviour
 		});
 		*/
 		GetComponent<MeshFilter>().mesh = mesh;
-		GetComponent<MeshRenderer>().material.mainTexture = texture;
+		Material paint_mod = new Material(paint);
+		paint.mainTexture = texture;
+		GetComponent<MeshRenderer>().materials = new Material[] {
+			cardboard,
+			paint_mod
+		};
 		if (front.width != back.width || front.height != back.height) {
 			throw new Exception ("CardboardBillboard: has different front and back sizes");
 		}
@@ -290,16 +298,19 @@ public class CardboardBillboard : MonoBehaviour
 		mesh.RecalculateNormals();
 
 		// Make the texture.
-		texture = new Texture2D(front.width + back.width + 4 * padding, front.height + side.height + 2 * padding, front.format, true);
+		texture = new Texture2D(front.width + back.width + 4 * padding, front.height + side.height + 2 * padding, TextureFormat.RGBA32, true);
 		Color[] pixels = texture.GetPixels();
 		for (int i = 0; i < pixels.Length; ++i) {
 			pixels[i] = new Color(0.0f, 0.0f, 0.0f, 1.0f);
 		}
 		texture.SetPixels(pixels);
-		if (back.format != front.format) {
+		if (front.format != texture.format) {
+			throw new Exception("CardboardBillboard: front has different texture format");
+		}
+		if (back.format != texture.format) {
 			throw new Exception("CardboardBillboard: back has different texture format");
 		}
-		if (side.format != front.format) {
+		if (side.format != texture.format) {
 			throw new Exception("CardboardBillboard: side has different texture format");
 		}
 		Graphics.CopyTexture(front, 0, 0, 0, 0, front.width, front.height, texture, 0, 0, padding, padding);
