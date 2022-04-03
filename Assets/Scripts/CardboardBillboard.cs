@@ -16,7 +16,7 @@ public class CardboardBillboard : MonoBehaviour
 	private Texture2D texture;
 	private float scale = 128.0f;
 	private float density = 4.0f;
-	private float margin = 0.05f;
+	private float margin = 0.2f;
 	private float push_factor = 1.0f;
 	private float smoothing = 0.5f;
 	private float thickness = 0.15f;
@@ -181,16 +181,7 @@ public class CardboardBillboard : MonoBehaviour
 			border.Reverse();
 		}
 
-		// Smooth the border.
-		List<Vector2> border_smoothed = new List<Vector2>(border.Count);
-		for (int i = 0; i < border.Count; ++i) {
-			Vector2 point = border[i];
-			Vector2 point_next = border[(i + 1) % border.Count];
-			Vector2 point_prev = border[i == 0 ? border.Count - 1 : i - 1];
-			Vector2 point_avg = 0.5f * (point_next + point_prev);
-			border_smoothed.Add(smoothing * point_avg + (1.0f - smoothing) * point);
-		}
-		border = border_smoothed;
+		List<Vector2> border_smoothed = new List<Vector2>();
 
 		// Push edges out.
 		border_smoothed = new List<Vector2>(border.Count);
@@ -205,6 +196,17 @@ public class CardboardBillboard : MonoBehaviour
 		}
 		border = border_smoothed;
 		
+		// Smooth the border.
+		border_smoothed = new List<Vector2>(border.Count);
+		for (int i = 0; i < border.Count; ++i) {
+			Vector2 point = border[i];
+			Vector2 point_next = border[(i + 1) % border.Count];
+			Vector2 point_prev = border[i == 0 ? border.Count - 1 : i - 1];
+			Vector2 point_avg = 0.5f * (point_next + point_prev);
+			border_smoothed.Add(smoothing * point_avg + (1.0f - smoothing) * point);
+		}
+		border = border_smoothed;
+
 		// Scale down.
 		Vector2 center_of_mass = new Vector2(0.0f, 0.0f);
 		for (int i = 0; i < border.Count; ++i) {
@@ -242,11 +244,15 @@ public class CardboardBillboard : MonoBehaviour
 		List<Vector2> texuv3d = new List<Vector2>(interior.Count * 6 + border.Count * 4);
 		for (int i = 0; i < interior.Count; ++i) {
 			points3d.Add(new Vector3(interior[i].x, interior[i].y, 0.5f * thickness));
-			texuv3d.Add(new Vector2(0.5f * interior[i].x / length_x, v_bottom * interior[i].y / length_y));
+			texuv3d.Add(new Vector2(
+				Mathf.Lerp(0.0f, 0.5f, (interior[i].x + margin * length_x) / ((1.0f + 2 * margin) * length_x)),
+				Mathf.Lerp(0.0f, v_bottom, (interior[i].y + margin * length_x) / ((1.0f + 2 * margin) * length_y))));
 		}
 		for (int i = 0; i < interior.Count; ++i) {
 			points3d.Add(new Vector3(interior[i].x, interior[i].y, -0.5f * thickness));
-			texuv3d.Add(new Vector2(0.5f * interior[i].x / length_x, v_bottom * interior[i].y / length_y));
+			texuv3d.Add(new Vector2(
+				Mathf.Lerp(0.5f, 1.0f, (interior[i].x + margin * length_x) / ((1.0f + 2 * margin) * length_x)),
+				Mathf.Lerp(0.0f, v_bottom, (interior[i].y + margin * length_x) / ((1.0f + 2 * margin) * length_y))));
 		}
 		for (int i = 0; i < triangles.Count; ++i) {
 			triangles3d.Add(triangles[i]);
