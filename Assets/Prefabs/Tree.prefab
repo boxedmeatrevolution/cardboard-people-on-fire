@@ -105,7 +105,7 @@ MonoBehaviour:
   stick: {fileID: 0}
   cardboard: {fileID: 2100000, guid: f92c3cbc48a0498f6b00f145b6ca30ff, type: 2}
   paint: {fileID: 2100000, guid: 3cb2bbfeaa550375ca9a5e38306db033, type: 2}
-  scale: 125
+  scale: 75
 --- !u!114 &7433495946744711054
 MonoBehaviour:
   m_ObjectHideFlags: 0
