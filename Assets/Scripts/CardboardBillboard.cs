@@ -19,7 +19,7 @@ public class CardboardBillboard : MonoBehaviour
 
 	private Mesh mesh;
 	private Texture2D texture;
-	private float scale = 600.0f;
+	public float scale = 600.0f;
 	private float density = 6.0f;
 	private float margin = 0.1f;
 	private float push_factor = 1.0f;
@@ -71,7 +71,7 @@ public class CardboardBillboard : MonoBehaviour
 			throw new Exception ("CardboardBillboard: has different front and back sizes");
 		}
 		if (mask.width != front.width || mask.height != front.height) {
-			throw new Exception ("CardboardBillboard: has different mask size");
+			throw new Exception ("CardboardBillboard: has different mask size " + mask.width.ToString() + ", " + mask.height.ToString() + ", " + front.width.ToString() + ", " + front.height.ToString());
 		}
 		// Randomly sample on a grid to get occupied pixels.
 		float length_x = front.width / scale;
