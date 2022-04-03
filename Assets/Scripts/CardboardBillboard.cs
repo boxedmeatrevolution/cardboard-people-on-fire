@@ -282,9 +282,9 @@ public class CardboardBillboard : MonoBehaviour
 			triangles3d.Add(2 * interior.Count + ((i < border.Count - 1) ? (2 * i + 2) : 0));
 			triangles3d.Add(2 * interior.Count + 2 * i + 1);
 			triangles3d.Add(2 * interior.Count + ((i < border.Count - 1) ? (2 * i + 3) : 1));
-			float border_pos = (float) i / (border.Count - 1);
+			float border_pos = 2.0f * (float) i / (border.Count - 1);
 			texuv3d.Add(new Vector2(border_pos, v_bottom));
-			texuv3d.Add(new Vector2(border_pos, 1.0f));
+			texuv3d.Add(new Vector2(border_pos, v_bottom + 0.25f * (1.0f - v_bottom)));
 		}
 		Debug.Log("texuvcs: " + String.Join(", ", texuv3d.ToArray()));
 		Debug.Log("vertices: " + String.Join(", ", points3d.ToArray()));
