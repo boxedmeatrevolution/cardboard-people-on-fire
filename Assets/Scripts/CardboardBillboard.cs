@@ -308,13 +308,13 @@ public class CardboardBillboard : MonoBehaviour
 		List<int> triangles3d = new List<int>(triangles.Count * 2 + border.Count * 6);
 		List<Vector2> texuv3d = new List<Vector2>(interior.Count * 6 + border.Count * 4);
 		for (int i = 0; i < interior.Count; ++i) {
-			points3d.Add(new Vector3(interior[i].x, interior[i].y, 0.5f * thickness));
+			points3d.Add(new Vector3(interior[i].x - 0.5f * length_x, interior[i].y, 0.5f * thickness));
 			texuv3d.Add(new Vector2(
 				Mathf.Lerp(0.0f, 0.5f, (interior[i].x + margin * length_x) / ((1.0f + 2 * margin) * length_x)),
 				Mathf.Lerp(0.0f, v_bottom, (interior[i].y + margin * length_x) / ((1.0f + 2 * margin) * length_y))));
 		}
 		for (int i = 0; i < interior.Count; ++i) {
-			points3d.Add(new Vector3(interior[i].x, interior[i].y, -0.5f * thickness));
+			points3d.Add(new Vector3(interior[i].x - 0.5f * length_x, interior[i].y, -0.5f * thickness));
 			texuv3d.Add(new Vector2(
 				Mathf.Lerp(0.5f, 1.0f, (interior[i].x + margin * length_x) / ((1.0f + 2 * margin) * length_x)),
 				Mathf.Lerp(0.0f, v_bottom, (interior[i].y + margin * length_x) / ((1.0f + 2 * margin) * length_y))));
@@ -331,8 +331,8 @@ public class CardboardBillboard : MonoBehaviour
 			}
 		}
 		for (int i = 0; i < border.Count; ++i) {
-			points3d.Add(new Vector3(border[i].x, border[i].y, 0.5f * thickness));
-			points3d.Add(new Vector3(border[i].x, border[i].y, -0.5f * thickness));
+			points3d.Add(new Vector3(border[i].x - 0.5f * length_x, border[i].y, 0.5f * thickness));
+			points3d.Add(new Vector3(border[i].x - 0.5f * length_x, border[i].y, -0.5f * thickness));
 			triangles3d.Add(2 * interior.Count + 2 * i);
 			triangles3d.Add(2 * interior.Count + 2 * i + 1);
 			triangles3d.Add(2 * interior.Count + ((i < border.Count - 1) ? (2 * i + 2) : 0));
