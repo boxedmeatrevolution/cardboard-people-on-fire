@@ -12,6 +12,7 @@ public class CardboardBillboard : MonoBehaviour
 	public Texture2D front;
 	public Texture2D back;
 	public Texture2D side;
+	public GameObject stick;
 
 	public Material cardboard;
 	public Material paint;
@@ -24,7 +25,7 @@ public class CardboardBillboard : MonoBehaviour
 	private float push_factor = 1.0f;
 	private float smoothing = 0.10f;
 	private int smoothing_iterations = 2;
-	private float thickness = 0.15f;
+	private float thickness = 0.10f;
 	private float deformation = 0.0f;
 	private float alpha_threshold = 0.1f;
 
@@ -58,16 +59,20 @@ public class CardboardBillboard : MonoBehaviour
 			cardboard,
 			paint_mod
 		};
+		if (stick != null) {
+			GameObject obj = Instantiate(stick);
+			obj.transform.SetParent(GetComponent<Transform>(), false);
+		}
+    }
+
+	void CreateMesh()
+	{
 		if (front.width != back.width || front.height != back.height) {
 			throw new Exception ("CardboardBillboard: has different front and back sizes");
 		}
 		if (mask.width != front.width || mask.height != front.height) {
 			throw new Exception ("CardboardBillboard: has different mask size");
 		}
-    }
-
-	void CreateMesh()
-	{
 		// Randomly sample on a grid to get occupied pixels.
 		float length_x = front.width / scale;
 		float length_y = front.height / scale;
@@ -337,9 +342,9 @@ public class CardboardBillboard : MonoBehaviour
 			triangles3d.Add(2 * interior.Count + ((i < border.Count - 1) ? (2 * i + 2) : 0));
 			triangles3d.Add(2 * interior.Count + 2 * i + 1);
 			triangles3d.Add(2 * interior.Count + ((i < border.Count - 1) ? (2 * i + 3) : 1));
-			float border_pos = 2.0f * (float) i / (border.Count - 1);
+			float border_pos = 1.0f * (float) i / (border.Count - 1);
 			texuv3d.Add(new Vector2(border_pos, v_bottom));
-			texuv3d.Add(new Vector2(border_pos, v_bottom + 0.25f * (1.0f - v_bottom)));
+			texuv3d.Add(new Vector2(border_pos, v_bottom + 0.5f * (1.0f - v_bottom)));
 		}
 		Debug.Log("texuvcs: " + String.Join(", ", texuv3d.ToArray()));
 		Debug.Log("vertices: " + String.Join(", ", points3d.ToArray()));
