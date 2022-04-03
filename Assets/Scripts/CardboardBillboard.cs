@@ -8,6 +8,7 @@ using mattatz.Triangulation2DSystem;
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class CardboardBillboard : MonoBehaviour
 {
+	public Texture2D mask;
 	public Texture2D front;
 	public Texture2D back;
 	public Texture2D side;
@@ -17,14 +18,14 @@ public class CardboardBillboard : MonoBehaviour
 
 	private Mesh mesh;
 	private Texture2D texture;
-	private float scale = 128.0f;
-	private float density = 3.0f;
-	private float margin = 0.2f;
+	private float scale = 600.0f;
+	private float density = 6.0f;
+	private float margin = 0.1f;
 	private float push_factor = 1.0f;
-	private float smoothing = 0.15f;
-	private int smoothing_iterations = 3;
+	private float smoothing = 0.10f;
+	private int smoothing_iterations = 2;
 	private float thickness = 0.15f;
-	private float deformation = 0.5f;
+	private float deformation = 0.0f;
 	private float alpha_threshold = 0.1f;
 
     // Start is called before the first frame update
@@ -60,12 +61,9 @@ public class CardboardBillboard : MonoBehaviour
 		if (front.width != back.width || front.height != back.height) {
 			throw new Exception ("CardboardBillboard: has different front and back sizes");
 		}
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+		if (mask.width != front.width || mask.height != front.height) {
+			throw new Exception ("CardboardBillboard: has different mask size");
+		}
     }
 
 	void CreateMesh()
@@ -91,8 +89,8 @@ public class CardboardBillboard : MonoBehaviour
 				if (idx_x > 0 && idx_x < num_points_x - 1 && idx_y > 0 && idx_y < num_points_y - 1) {
 					int pix_x = (int) Mathf.Floor(x * scale);
 					int pix_y = (int) Mathf.Floor(y * scale);
-					occupied_front = (front.GetPixel(pix_x, pix_y).a > alpha_threshold);
-					occupied_back = (back.GetPixel(pix_x, pix_y).a > alpha_threshold);
+					occupied_front = (mask.GetPixel(pix_x, pix_y).a > alpha_threshold);
+					occupied_back = (mask.GetPixel(pix_x, pix_y).a > alpha_threshold);
 				}
 				points[idx] = new Vector2(x, y);
 				occupied[idx] = (occupied_front || occupied_back) ? 1 : 0;
@@ -311,13 +309,13 @@ public class CardboardBillboard : MonoBehaviour
 			points3d.Add(new Vector3(interior[i].x - 0.5f * length_x, interior[i].y, 0.5f * thickness));
 			texuv3d.Add(new Vector2(
 				Mathf.Lerp(0.0f, 0.5f, (interior[i].x + margin * length_x) / ((1.0f + 2 * margin) * length_x)),
-				Mathf.Lerp(0.0f, v_bottom, (interior[i].y + margin * length_x) / ((1.0f + 2 * margin) * length_y))));
+				Mathf.Lerp(0.0f, v_bottom, (interior[i].y + margin * length_y) / ((1.0f + 2 * margin) * length_y))));
 		}
 		for (int i = 0; i < interior.Count; ++i) {
 			points3d.Add(new Vector3(interior[i].x - 0.5f * length_x, interior[i].y, -0.5f * thickness));
 			texuv3d.Add(new Vector2(
 				Mathf.Lerp(0.5f, 1.0f, (interior[i].x + margin * length_x) / ((1.0f + 2 * margin) * length_x)),
-				Mathf.Lerp(0.0f, v_bottom, (interior[i].y + margin * length_x) / ((1.0f + 2 * margin) * length_y))));
+				Mathf.Lerp(0.0f, v_bottom, (interior[i].y + margin * length_y) / ((1.0f + 2 * margin) * length_y))));
 		}
 		for (int i = 0; i < triangles.Count; ++i) {
 			triangles3d.Add(triangles[i]);
