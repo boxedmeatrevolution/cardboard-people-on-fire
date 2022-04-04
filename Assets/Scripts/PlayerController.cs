@@ -81,6 +81,7 @@ public class PlayerController : MonoBehaviour
         HandleInteractionInput();
 
 		if (Input.GetButton("Fire1")) {
+            Debug.Log("Shoot");
 			water.Play();
 		} else {
 			water.Stop();

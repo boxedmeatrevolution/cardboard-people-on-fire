@@ -9,21 +9,24 @@ public class Flammable : MonoBehaviour
 	public float heatup_time = 4.0f;
 	public float threshold_distance = 3.0f;
 	public bool on_fire = false;
+	public bool auto_on = true;
 	public GameObject effect;
+
+	bool splashed = false;
 
 	private static List<Flammable> flammables = new List<Flammable>();
     void OnEnable()
     {
         flammables.Add(this);
-		if (flammables.Count == 1) {
-			on_fire = true;
-		}
-		if (!on_fire) {
-			Extinguish();
-		} else {
+		if (flammables.Count == 1 && auto_on) {
 			Enflame();
 		}
+		else
+		{ 
+			Extinguish();
+		}    
     }
+
     void OnDisable()
     {
         flammables.Remove(this);
@@ -48,14 +51,20 @@ public class Flammable : MonoBehaviour
 		if (source != null) {
 			heat += count * Time.deltaTime / heatup_time;
 			if (heat > 1.0f && !on_fire) {
-				on_fire = true;
 				Enflame();
 			}
-		} else {
+		} else if (!on_fire) {
 			heat -= Time.deltaTime / cooldown_time;
-		}
+		} else if (on_fire && splashed) {
+			splashed = false;
+			heat -= 0.2f;
+        }
 
 		heat = Mathf.Clamp(heat, 0.0f, 1.0f);
+
+		if (on_fire && heat == 0) {
+			Extinguish();
+        }
 
 		if (on_fire) {
 			Health health = transform.parent.gameObject.GetComponent<Health>();
@@ -65,12 +74,20 @@ public class Flammable : MonoBehaviour
 		}
     }
 
-	void Enflame() {
+	public void Splash() {
+		splashed = true;
+    }
+
+	public void Enflame() {
+		on_fire = true;
+		heat = 1f;
 		effect.GetComponent<ParticleSystem>().Play();
 		effect.GetComponent<Light>().enabled = true;
 	}
 
-	void Extinguish() {
+	public void Extinguish() {
+		on_fire = false;
+		heat = 0f;
 		effect.GetComponent<ParticleSystem>().Stop();
 		effect.GetComponent<Light>().enabled = false;
 	}
