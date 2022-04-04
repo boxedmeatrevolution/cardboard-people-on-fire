@@ -15,15 +15,21 @@ public class AutonomousWalkerController : MonoBehaviour
 	private float swivel_distance = 5.0f;
 
 	private int state = 0;
+	private Flammable flammable;
 
     // Start is called before the first frame update
     void Start()
     {
         character_controller = GetComponent<CharacterController>();
+		flammable = GetComponentInChildren<Flammable>();
 		swivel = GetComponent<Swivel>();
 		swivel.enabled = false;
 		player = GameObject.Find("Player");
     }
+
+	void OnParticleCollision(GameObject obj) {
+		flammable.Splash();
+	}
 
     // Update is called once per frame
     void Update()

@@ -12,8 +12,6 @@ public class Flammable : MonoBehaviour
 	public bool auto_on = true;
 	public GameObject effect;
 
-	bool splashed = false;
-
 	private static List<Flammable> flammables = new List<Flammable>();
     void OnEnable()
     {
@@ -55,10 +53,7 @@ public class Flammable : MonoBehaviour
 			}
 		} else if (!on_fire) {
 			heat -= Time.deltaTime / cooldown_time;
-		} else if (on_fire && splashed) {
-			splashed = false;
-			heat -= 0.2f;
-        }
+		}
 
 		heat = Mathf.Clamp(heat, 0.0f, 1.0f);
 
@@ -75,7 +70,13 @@ public class Flammable : MonoBehaviour
     }
 
 	public void Splash() {
-		splashed = true;
+		heat -= 0.04f;
+		if (heat < 0.0f) {
+			heat = 0.0f;
+		}
+		if (on_fire) {
+			Extinguish();
+		}
     }
 
 	public void Enflame() {
