@@ -82,6 +82,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 1
   rot_speed: 40
+  type: 2
 --- !u!136 &1981862211103323915
 CapsuleCollider:
   m_ObjectHideFlags: 0
