@@ -62,7 +62,6 @@ public class TutorialPerson : Approachable
             text.text = "Use the Left Mouse Button to end all suffering.";
         }
 
-        Invoke(nameof(EndTutorial), 1);
     }
 
     void EndTutorial()
