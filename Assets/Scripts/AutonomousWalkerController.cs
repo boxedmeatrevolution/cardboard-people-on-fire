@@ -24,6 +24,8 @@ public class AutonomousWalkerController : MonoBehaviour
 	private float time_to_start_react = 1.0f;
 	private float time_to_stop_react = 2.0f;
 	private float react_timer = 0.0f;
+	private float wobble_timer = 0.0f;
+	private float wobble_period = 0.6f;
 
 	public AudioClip[] sounds;
 	AudioSource audioSource;
@@ -157,7 +159,7 @@ public class AutonomousWalkerController : MonoBehaviour
 		} else if (state == 4) {
 			react_timer += Time.deltaTime;
 			if (react_timer > time_to_stop_react) {
-				state = 2;
+				state = 0;
 			}
 			if (type == 0) {
 				velocity_plane.x = 0.0f;
@@ -204,6 +206,11 @@ public class AutonomousWalkerController : MonoBehaviour
 		}
 
 		real_velocity_plane = velocity_plane + Mathf.Exp(-Time.deltaTime / 0.3f) * (real_velocity_plane - velocity_plane);
+		wobble_timer += Time.deltaTime;
+		if (wobble_timer > wobble_period) {
+			wobble_timer -= wobble_period;
+		}
+		transform.localEulerAngles = new Vector3(0.0f, transform.localEulerAngles.y, 10.0f * real_velocity_plane.magnitude * Mathf.Sin(2.0f * Mathf.PI * wobble_timer / wobble_period));
         character_controller.Move(new Vector3(real_velocity_plane.x, velocity_y, real_velocity_plane.z) * Time.deltaTime);
     }
 }
