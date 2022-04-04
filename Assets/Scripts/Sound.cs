@@ -10,9 +10,12 @@ public class Sound
     public AudioClip clip;
 
     [Range(0f, 1f)]
-    public float volume;
+    public float defaultVolume;
+    [Range(0f, 1f)]
+    public float offVolume;
     [Range(.1f, 3f)]
     public float pitch;
+    public bool startOff = true;
     public bool loop;
 
     [HideInInspector]
@@ -23,8 +26,4 @@ public class Sound
     public bool isFade = false;
     [HideInInspector]
     public float targetVolume = 0f;
-    [HideInInspector]
-    public float fadeSpeed = 0f;
-    [HideInInspector]
-    public float elapsedTime = 0f;
 }

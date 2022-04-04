@@ -25,10 +25,14 @@ public class AutonomousWalkerController : MonoBehaviour
 	private float time_to_stop_react = 2.0f;
 	private float react_timer = 0.0f;
 
+	public AudioClip[] sounds;
+	AudioSource audioSource;
+
     // Start is called before the first frame update
     void Start()
     {
-        character_controller = GetComponent<CharacterController>();
+		audioSource = GetComponent<AudioSource>();
+		character_controller = GetComponent<CharacterController>();
 		flammable = GetComponentInChildren<Flammable>();
 		swivel = GetComponent<Swivel>();
 		swivel.enabled = false;
@@ -55,6 +59,14 @@ public class AutonomousWalkerController : MonoBehaviour
 			swivel_distance = 3.0f;
 		}
     }
+
+	void PlayRandomSound()
+	{
+		if (sounds.Length > 0) { 
+            AudioClip clip = sounds[Random.Range(0, sounds.Length)];
+            audioSource.PlayOneShot(clip);
+        }
+	}
 
 	void OnParticleCollision(GameObject obj) {
 		flammable.Splash();
@@ -87,6 +99,7 @@ public class AutonomousWalkerController : MonoBehaviour
 				velocity_plane.x = 0.0f;
 				velocity_plane.z = 0.0f;
 				state = -1;
+				PlayRandomSound();
 			}
 		} else if (state == -1) {
 			swivel.enabled = false;

@@ -4,9 +4,12 @@ using UnityEngine;
 
 public class MainBGMusic : MonoBehaviour
 {
+    AudioManager am;
     void Start()
     {
-        FindObjectOfType<AudioManager>().Play("city-music");
+        am = FindObjectOfType<AudioManager>();
+        am.Play("city-music");
+        am.Play("waveloop");
     }
 
     // Update is called once per frame

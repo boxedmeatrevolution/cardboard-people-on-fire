@@ -25,7 +25,6 @@ public class FadeSoundCollider : MonoBehaviour
     {
         if (other.GetComponentInParent<PlayerController>())
         {
-           audioManager.FadeVolume(clipName, targetVolume, overTime);
         }
     }
 
@@ -33,7 +32,6 @@ public class FadeSoundCollider : MonoBehaviour
     {
         if (other.GetComponentInParent<PlayerController>())
         {
-            audioManager.FadeVolume(clipName, 0f, overTime);
         }
     }
 }

@@ -5,6 +5,9 @@ public class AudioManager : MonoBehaviour
 {
 
     public Sound[] sounds;
+    public float fadeSpeed = 1f / 5f;
+
+    string currBgSound;
 
 
 
@@ -16,7 +19,7 @@ public class AudioManager : MonoBehaviour
         {
             s.source = gameObject.AddComponent<AudioSource>();
             s.source.clip = s.clip;
-            s.source.volume = s.volume;
+            s.source.volume = s.defaultVolume;
             s.source.pitch = s.pitch;
             s.source.loop = s.loop;
         }
@@ -28,9 +31,11 @@ public class AudioManager : MonoBehaviour
         { 
             if (s.isFade) 
             {
-                float newVolume = s.source.volume + Time.deltaTime * s.fadeSpeed;
-                if ((s.fadeSpeed > 0 && newVolume > s.targetVolume) || newVolume < s.targetVolume)
-                {
+                float dir = s.source.volume < s.targetVolume ? 1 : -1;
+                float newVolume = s.source.volume + Time.deltaTime * fadeSpeed * dir;
+                float newDir = newVolume < s.targetVolume ? 1 : -1;
+
+                if (newDir != dir) { 
                     newVolume = s.targetVolume;
                     s.isFade = false;
                 }
@@ -43,15 +48,10 @@ public class AudioManager : MonoBehaviour
     {
         Debug.Log(name);
         Sound s = Array.Find(sounds, sound => sound.name == name);
-        s.source.Play();
-    }
 
-    public void FadeVolume(string name, float targetVolume, float overTime) 
-    {
-        Sound s = Array.Find(sounds, sound => sound.name == name);
-        s.isFade = true;
-        s.targetVolume = targetVolume;
-        s.fadeSpeed = (targetVolume - s.source.volume) / overTime;
-        s.elapsedTime = 0f;
+        if (s.startOff) {
+            s.source.volume = s.offVolume;
+        }
+        s.source.Play();
     }
 }
