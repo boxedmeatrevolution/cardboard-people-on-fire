@@ -17,4 +17,14 @@ public class Sound
 
     [HideInInspector]
     public AudioSource source;
+
+
+    [HideInInspector]
+    public bool isFade = false;
+    [HideInInspector]
+    public float targetVolume = 0f;
+    [HideInInspector]
+    public float fadeSpeed = 0f;
+    [HideInInspector]
+    public float elapsedTime = 0f;
 }

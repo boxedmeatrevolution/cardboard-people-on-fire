@@ -51,9 +51,27 @@ MonoBehaviour:
     pitch: 1
     loop: 1
     source: {fileID: 0}
+    isFade: 0
+    targetVolume: 0
+    fadeSpeed: 0
+    elapsedTime: 0
   - name: waveloop
     clip: {fileID: 8300000, guid: 05db68a2e891142b796f1cd16c5c9244, type: 3}
     volume: 1
     pitch: 1
     loop: 1
     source: {fileID: 0}
+    isFade: 0
+    targetVolume: 0
+    fadeSpeed: 0
+    elapsedTime: 0
+  - name: top-of-lighthouse
+    clip: {fileID: 8300000, guid: 6d4d07bd5599d4f07bfea267f3290ce8, type: 3}
+    volume: 1
+    pitch: 1
+    loop: 1
+    source: {fileID: 0}
+    isFade: 0
+    targetVolume: 0
+    fadeSpeed: 0
+    elapsedTime: 0

@@ -29,6 +29,8 @@ public class SoundEmitter : Approachable
         elapsed += Time.deltaTime;
         if (elapsed > nextSound) {
             PlayRandomSound();
+            elapsed = 0f;
+            ScheduleNextSound();
         }
     }
 
