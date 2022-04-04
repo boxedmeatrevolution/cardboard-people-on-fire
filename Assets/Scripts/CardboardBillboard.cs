@@ -78,7 +78,6 @@ public class CardboardBillboard : MonoBehaviour
 		float length_y = front.height / scale;
 		int num_points_x = (int) Mathf.Ceil(length_x * density) + 1;
 		int num_points_y = (int) Mathf.Ceil(length_y * density) + 1;
-		Debug.Log("dimensions: " + num_points_x.ToString() + ", " + num_points_y.ToString());
 		List<Vector2> points = new List<Vector2>(new Vector2[num_points_x * num_points_y]);
 		// Three allowed values: 0: not occupied, 1: occupied, 2: border.
 		List<int> occupied = new List<int>(new int[num_points_x * num_points_y]);
@@ -137,7 +136,6 @@ public class CardboardBillboard : MonoBehaviour
 				}
 			}
 		}
-		Debug.Log("occupied: " + String.Join(", ", occupied.ToArray()));
 
 		// Find a starting point for the border, where a point is occupied but its neighbours aren't.
 		int border_start_idx = -1;
@@ -174,7 +172,6 @@ public class CardboardBillboard : MonoBehaviour
 				new Tuple<int, int>(+1,-1),
 				new Tuple<int, int>(-1,+1)
 			};
-			Debug.Log("border idx: " + String.Join(", ", border_idx.ToArray()));
 			foreach (Tuple<int, int> diff in diffs) {
 				int diff_x = diff.Item1;
 				int diff_y = diff.Item2;
@@ -219,18 +216,15 @@ public class CardboardBillboard : MonoBehaviour
 				if (border_idx.Count == 0) {
 					throw new Exception("CardboardBillboard: ran out of idxs");
 				}
-				Debug.Log("backtracking");
 				//throw new Exception("CardboardBillboard: couldn't find neighbour");
 			}
 		} while (true);
 		total_rotation += Mathf.Repeat(first_rotation - last_rotation + Mathf.PI, 2.0f * Mathf.PI) - Mathf.PI;
-		Debug.Log("total rotation: " + total_rotation.ToString());
 		List<Vector2> border = new List<Vector2>(border_idx.Count);
 		for (int i = 0; i < border_idx.Count; ++i) {
 			border.Add(points[border_idx[i]]);
 		}
 		if (total_rotation < 0.0f) {
-			Debug.Log("REVERSED!");
 			border.Reverse();
 		}
 
@@ -293,7 +287,6 @@ public class CardboardBillboard : MonoBehaviour
 				Mathf.Clamp(border[i].y, -margin * length_y, (1.0f + margin) * length_y));
 		}
 
-		Debug.Log("border: " + String.Join(", ", border.ToArray()));
 		//Polygon2D polygon = Polygon2D.Contour(border.ToArray());
     	//Triangulation2D triangulator = new Triangulation2D(polygon, 22.5f);
 		//Mesh interior_mesh = triangulator.Build();
@@ -302,7 +295,6 @@ public class CardboardBillboard : MonoBehaviour
 		Triangulator triangulator = new Triangulator(border.ToArray());
 		List<Vector2> interior = border;
 		List<int> triangles = new List<int>(triangulator.Triangulate());
-		Debug.Log("number of triangles: " + triangles.Count.ToString());
 
 		// Make triangles for the two faces, then make triangles for the corrugated edge.
 		int padding = (int) (front.height * margin);
@@ -346,9 +338,6 @@ public class CardboardBillboard : MonoBehaviour
 			texuv3d.Add(new Vector2(border_pos, v_bottom));
 			texuv3d.Add(new Vector2(border_pos, v_bottom + 0.5f * (1.0f - v_bottom)));
 		}
-		Debug.Log("texuvcs: " + String.Join(", ", texuv3d.ToArray()));
-		Debug.Log("vertices: " + String.Join(", ", points3d.ToArray()));
-		Debug.Log("triangles: " + String.Join(", ", triangles3d.ToArray()));
 
 		// Assign the mesh.
 		mesh = new Mesh();

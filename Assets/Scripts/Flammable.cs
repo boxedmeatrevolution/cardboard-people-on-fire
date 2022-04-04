@@ -12,7 +12,6 @@ public class Flammable : MonoBehaviour
 	public GameObject effect;
 
 	private static List<Flammable> flammables = new List<Flammable>();
-	private GameObject my_flame;
     void OnEnable()
     {
         flammables.Add(this);
@@ -20,15 +19,15 @@ public class Flammable : MonoBehaviour
 			on_fire = true;
 		}
 		if (!on_fire) {
-			effect.GetComponent<ParticleSystem>().Stop();
+			Extinguish();
 		} else {
-			effect.GetComponent<ParticleSystem>().Play();
+			Enflame();
 		}
     }
     void OnDisable()
     {
         flammables.Remove(this);
-		effect.GetComponent<ParticleSystem>().Stop();
+		Extinguish();
     }
 
     // Update is called once per frame
@@ -50,7 +49,7 @@ public class Flammable : MonoBehaviour
 			heat += count * Time.deltaTime / heatup_time;
 			if (heat > 1.0f && !on_fire) {
 				on_fire = true;
-				effect.GetComponent<ParticleSystem>().Play();
+				Enflame();
 			}
 		} else {
 			heat -= Time.deltaTime / cooldown_time;
@@ -65,5 +64,15 @@ public class Flammable : MonoBehaviour
 			}
 		}
     }
+
+	void Enflame() {
+		effect.GetComponent<ParticleSystem>().Play();
+		effect.GetComponent<Light>().enabled = true;
+	}
+
+	void Extinguish() {
+		effect.GetComponent<ParticleSystem>().Stop();
+		effect.GetComponent<Light>().enabled = false;
+	}
 }
 
