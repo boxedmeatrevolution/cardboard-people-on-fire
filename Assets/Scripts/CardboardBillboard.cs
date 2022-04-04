@@ -20,10 +20,10 @@ public class CardboardBillboard : MonoBehaviour
 	private Mesh mesh;
 	private Texture2D texture;
 	public float scale = 600.0f;
-	private float density = 6.0f;
-	private float margin = 0.1f;
-	private float push_factor = 1.0f;
-	private float smoothing = 0.10f;
+	public float density = 6.0f;
+	public float margin = 0.1f;
+	public float push_factor = 1.0f;
+	public float smoothing = 0.10f;
 	private int smoothing_iterations = 2;
 	private float thickness = 0.10f;
 	private float deformation = 0.0f;
@@ -297,8 +297,9 @@ public class CardboardBillboard : MonoBehaviour
 		List<int> triangles = new List<int>(triangulator.Triangulate());
 
 		// Make triangles for the two faces, then make triangles for the corrugated edge.
-		int padding = (int) (front.height * margin);
-		float v_bottom = (float) (front.height + 2 * padding) / (front.height + 2 * padding + side.height);
+		int padding_vert = (int) (front.height * margin);
+		int padding_horz = (int) (front.width * margin);
+		float v_bottom = (float) (front.height + 2 * padding_vert) / (front.height + 2 * padding_vert + side.height);
 		List<Vector3> points3d = new List<Vector3>(interior.Count * 2 + border.Count * 2);
 		List<int> triangles3d = new List<int>(triangles.Count * 2 + border.Count * 6);
 		List<Vector2> texuv3d = new List<Vector2>(interior.Count * 6 + border.Count * 4);
@@ -347,7 +348,7 @@ public class CardboardBillboard : MonoBehaviour
 		mesh.RecalculateNormals();
 
 		// Make the texture.
-		texture = new Texture2D(front.width + back.width + 4 * padding, front.height + side.height + 2 * padding, TextureFormat.RGBA32, true);
+		texture = new Texture2D(front.width + back.width + 4 * padding_horz, front.height + side.height + 2 * padding_vert, TextureFormat.RGBA32, true);
 		Color[] pixels = texture.GetPixels();
 		for (int i = 0; i < pixels.Length; ++i) {
 			pixels[i] = Color.clear;
@@ -362,13 +363,13 @@ public class CardboardBillboard : MonoBehaviour
 		if (side.format != texture.format) {
 			throw new Exception("CardboardBillboard: side has different texture format");
 		}
-		Graphics.CopyTexture(front, 0, 0, 0, 0, front.width, front.height, texture, 0, 0, padding, padding);
-		Graphics.CopyTexture(back, 0, 0, 0, 0, back.width, back.height, texture, 0, 0, front.width + 3 * padding, padding);
+		Graphics.CopyTexture(front, 0, 0, 0, 0, front.width, front.height, texture, 0, 0, padding_horz, padding_vert);
+		Graphics.CopyTexture(back, 0, 0, 0, 0, back.width, back.height, texture, 0, 0, front.width + 3 * padding_horz, padding_vert);
 		int side_coord = 0;
-		while (side_coord < front.width + back.width + 4 * padding) {
-			int pix_remaining = front.width + back.width + 4 * padding - side_coord;
+		while (side_coord < front.width + back.width + 4 * padding_horz) {
+			int pix_remaining = front.width + back.width + 4 * padding_horz - side_coord;
 			int pix_available = side.width;
-			Graphics.CopyTexture(side, 0, 0, 0, 0, Mathf.Min(pix_remaining, pix_available), side.height, texture, 0, 0, side_coord, front.height + 2 * padding);
+			Graphics.CopyTexture(side, 0, 0, 0, 0, Mathf.Min(pix_remaining, pix_available), side.height, texture, 0, 0, side_coord, front.height + 2 * padding_vert);
 			side_coord += Mathf.Min(pix_remaining, pix_available);
 		}
 		texture.Apply(true, true);
