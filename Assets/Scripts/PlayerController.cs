@@ -16,13 +16,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] public float lookSpeed = 2.0f;
     [SerializeField] public float lookXLimit = 45.0f;
 
-    [Header("Controls")]
-    [SerializeField] private KeyCode sprintKey = KeyCode.LeftShift;
-    [SerializeField] private KeyCode interactionKey = KeyCode.Mouse1;
-
     CharacterController characterController;
     Vector3 moveDirection = Vector3.zero;
     float rotationX = 0;
+
+	ParticleSystem water;
 
     [HideInInspector]
     public bool canMove = true;
@@ -34,6 +32,7 @@ public class PlayerController : MonoBehaviour
         // Lock cursor
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+		water = GetComponentInChildren<ParticleSystem>();
     }
 
     void Update()
@@ -42,7 +41,7 @@ public class PlayerController : MonoBehaviour
         Vector3 forward = transform.TransformDirection(Vector3.forward);
         Vector3 right = transform.TransformDirection(Vector3.right);
         // Press Left Shift to run
-        bool isRunning = Input.GetKey(sprintKey);
+        bool isRunning = Input.GetButton("Fire3");
         float curSpeedX = canMove ? (isRunning ? runningSpeed : walkingSpeed) * Input.GetAxis("Vertical") : 0;
         float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * Input.GetAxis("Horizontal") : 0;
         float movementDirectionY = moveDirection.y;
@@ -80,6 +79,12 @@ public class PlayerController : MonoBehaviour
         // Interaction stuff
         HandleInteractionCheck();
         HandleInteractionInput();
+
+		if (Input.GetButton("Fire1")) {
+			water.Play();
+		} else {
+			water.Stop();
+		}
     }
 
     [Header("Interaction")]
@@ -127,7 +132,7 @@ public class PlayerController : MonoBehaviour
 
     private void HandleInteractionInput()
     {
-        if (Input.GetKeyDown(interactionKey) && currentInteractable != null)
+        if (Input.GetButton("Fire2") && currentInteractable != null)
         {
             currentInteractable.OnInteract();
         }
