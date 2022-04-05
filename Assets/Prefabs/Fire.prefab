@@ -4864,6 +4864,8 @@ MonoBehaviour:
   heatup_time: 4
   threshold_distance: 2
   on_fire: 0
+  auto_on: 0
+  combustion_time: 10
   effect: {fileID: 7154010937219027774}
 --- !u!33 &6145394661170613961
 MeshFilter:
@@ -4880,7 +4882,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4082388184698188282}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1

@@ -26,9 +26,12 @@ public class PlayerController : MonoBehaviour
     [HideInInspector]
     public bool canMove = true;
 
+    AudioManager audioManager;
+
     void Start()
     {
         characterController = GetComponent<CharacterController>();
+        audioManager = FindObjectOfType<AudioManager>();
 
         // Lock cursor
         Cursor.lockState = CursorLockMode.Locked;
@@ -85,11 +88,14 @@ public class PlayerController : MonoBehaviour
 			if (!shooting) {
 				shooting = true;
 				Debug.Log("Shoot");
+                audioManager.Play("hose");
 				water.Play();
 			}
 		} else {
 			if (shooting) {
 				shooting = false;
+                audioManager.Stop("hose");
+                audioManager.PlayOneShot("hose_off");
 				water.Stop();
 			}
 		}
