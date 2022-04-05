@@ -23,11 +23,20 @@ public class FadeSoundCollider : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        audioManager.currBgSound = clipName;
+        if (other.GetComponentInParent<PlayerController>()) 
+        {
+            Debug.Log("On stay");
+            audioManager.currBgSound = clipName;
+        }
+
     }
 
     private void OnTriggerExit(Collider other)
     {
-        audioManager.currBgSound = "city-music";
+        if (other.GetComponentInParent<PlayerController>())
+        {
+            Debug.Log("Exit");
+            audioManager.currBgSound = "city-music";
+        }
     }
 }
