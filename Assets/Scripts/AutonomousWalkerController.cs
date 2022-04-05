@@ -77,6 +77,17 @@ public class AutonomousWalkerController : MonoBehaviour
 
 	void OnParticleCollision(GameObject obj) {
 		flammable.Splash();
+		Vector3 displacement = player.transform.position - transform.position;
+		displacement.Normalize();
+		displacement.y = 0.0f;
+		if (state != -2) {
+			state = -2;
+			velocity_plane = -8.0f * displacement;
+			velocity_y = 8.0f;
+		} else {
+			velocity_plane -= 1.0f * displacement;
+			velocity_y += 1.0f;
+		}
 	}
 
     // Update is called once per frame
@@ -117,7 +128,7 @@ public class AutonomousWalkerController : MonoBehaviour
 		// Distance to player.
 		float distance = Vector3.Distance(transform.position, player.transform.position);
 		if (distance < swivel_distance) {
-			if (state != -1 && state != 4) {
+			if (state != -2 && state != -3 && state != -1 && state != 4) {
 				swivel.enabled = true;
 				react_timer = 0.0f;
 				velocity_plane.x = 0.0f;
@@ -224,6 +235,18 @@ public class AutonomousWalkerController : MonoBehaviour
 				}
 				velocity_plane.Normalize();
 				velocity_plane *= 5 * speed;
+			}
+		} else if (state == -2) {
+			transform.Rotate(0.0f, 4.0f * rot_speed * Time.deltaTime, 0.0f);
+        	if (character_controller.isGrounded) {
+				react_timer = 0.0f;
+				state = -3;
+			}
+		} else if (state == -3) {
+			react_timer += Time.deltaTime;
+			velocity_plane = Vector3.zero;
+			if (react_timer > 0.5f) {
+				state = 0;
 			}
 		}
 
