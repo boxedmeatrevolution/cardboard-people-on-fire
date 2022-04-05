@@ -9,6 +9,10 @@ public class AudioManager : MonoBehaviour
 
     public string currBgSound = "city-music";
 
+    bool jinglep1 = false;
+    bool jinglep2 = false;
+    bool maint = false;
+
     void Start() {
     }
 
@@ -25,6 +29,23 @@ public class AudioManager : MonoBehaviour
 
     void Update()
     {
+        Sound j1 = Array.Find(sounds, sound => sound.name == "j1");
+        Sound j2 = Array.Find(sounds, sound => sound.name == "j2");
+        if (!jinglep1) {
+            jinglep1 = true;
+            j1.source.Play();
+        }
+        else if (!jinglep2 && !j1.source.isPlaying)
+        {
+            jinglep2 = true;
+            j2.source.Play();
+        }
+        else if (!maint && !j2.source.isPlaying)
+        {
+            maint = true;
+            Array.Find(sounds, sound => sound.name == "city-music").source.Play();
+        }
+
         foreach (Sound s in sounds) 
         { 
             if ((s.name == currBgSound && s.source.volume != s.defaultVolume) || s.source.volume != s.offVolume) {
