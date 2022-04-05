@@ -9,7 +9,9 @@ public class Flammable : MonoBehaviour
 	public float heatup_time = 4.0f;
 	public float threshold_distance = 3.0f;
 	public bool on_fire = false;
-	public bool auto_on = true;
+	public bool auto_on = false;
+	// Average time to combust (* number of current on fire);
+	public float combustion_time = 10.0f;
 	public GameObject effect;
 
 	private static List<Flammable> flammables = new List<Flammable>();
@@ -56,10 +58,18 @@ public class Flammable : MonoBehaviour
 		}
 
 		heat = Mathf.Clamp(heat, 0.0f, 1.0f);
+		if (on_fire) {
+			heat = 1.0f;
+		}
 
 		if (on_fire && heat == 0) {
 			Extinguish();
         }
+
+		if (UnityEngine.Random.Range(0.0f, 1.0f) >= Mathf.Exp(-Time.deltaTime / ((flammables.Count + 1) * combustion_time))) {
+			heat = 1.0f;
+			Enflame();
+		}
 
 		if (on_fire) {
 			Health health = transform.parent.gameObject.GetComponent<Health>();

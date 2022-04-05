@@ -20,12 +20,16 @@ public class AutonomousWalkerController : MonoBehaviour
 
 	private int state = 0;
 	private Flammable flammable;
+	private Health health;
+	private bool dead = false;
 
 	private float time_to_start_react = 1.0f;
 	private float time_to_stop_react = 2.0f;
 	private float react_timer = 0.0f;
 	private float wobble_timer = 0.0f;
 	private float wobble_period = 0.6f;
+	private float dead_timer = 0.0f;
+	private float cache_y = 0.0f;
 
 	public AudioClip[] sounds;
 	AudioSource audioSource;
@@ -36,6 +40,7 @@ public class AutonomousWalkerController : MonoBehaviour
 		audioSource = GetComponent<AudioSource>();
 		character_controller = GetComponent<CharacterController>();
 		flammable = GetComponentInChildren<Flammable>();
+		health = GetComponent<Health>();
 		swivel = GetComponent<Swivel>();
 		swivel.enabled = false;
 		player = GameObject.Find("Player");
@@ -72,11 +77,39 @@ public class AutonomousWalkerController : MonoBehaviour
 
 	void OnParticleCollision(GameObject obj) {
 		flammable.Splash();
+		Vector3 displacement = player.transform.position - transform.position;
+		displacement.Normalize();
+		displacement.y = 0.0f;
+		if (state != -2) {
+			state = -2;
+			velocity_plane = -8.0f * displacement;
+			velocity_y = 8.0f;
+		} else {
+			velocity_plane -= 1.0f * displacement;
+			velocity_y += 1.0f;
+		}
 	}
 
     // Update is called once per frame
     void Update()
     {
+		if (health.hp < 0.0f) {
+			if (!dead) {
+				dead = true;
+				velocity_y = 0.0f;
+				dead_timer = 0.0f;
+				cache_y = transform.localEulerAngles.y;
+			}
+			dead_timer += Time.deltaTime;
+			float rot = 180.0f * (1.0f - Mathf.Exp(-dead_timer / 1.4f));
+			transform.localEulerAngles = new Vector3(rot, cache_y, 0.0f);
+			transform.position += velocity_y * Time.deltaTime * Vector3.up;
+			velocity_y += 1.0f * Time.deltaTime;
+			if (transform.position.y > 200.0f) {
+				Destroy(gameObject);
+			}
+			return;
+		}
         if (!character_controller.isGrounded) {
 			velocity_y -= gravity * Time.deltaTime;
         } else {
@@ -95,7 +128,7 @@ public class AutonomousWalkerController : MonoBehaviour
 		// Distance to player.
 		float distance = Vector3.Distance(transform.position, player.transform.position);
 		if (distance < swivel_distance) {
-			if (state != -1 && state != 4) {
+			if (state != -2 && state != -3 && state != -1 && state != 4) {
 				swivel.enabled = true;
 				react_timer = 0.0f;
 				velocity_plane.x = 0.0f;
@@ -202,6 +235,18 @@ public class AutonomousWalkerController : MonoBehaviour
 				}
 				velocity_plane.Normalize();
 				velocity_plane *= 5 * speed;
+			}
+		} else if (state == -2) {
+			transform.Rotate(0.0f, 4.0f * rot_speed * Time.deltaTime, 0.0f);
+        	if (character_controller.isGrounded) {
+				react_timer = 0.0f;
+				state = -3;
+			}
+		} else if (state == -3) {
+			react_timer += Time.deltaTime;
+			velocity_plane = Vector3.zero;
+			if (react_timer > 0.5f) {
+				state = 0;
 			}
 		}
 
