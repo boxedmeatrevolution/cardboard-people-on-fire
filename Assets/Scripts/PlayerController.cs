@@ -19,6 +19,7 @@ public class PlayerController : MonoBehaviour
     CharacterController characterController;
     Vector3 moveDirection = Vector3.zero;
     float rotationX = 0;
+	bool shooting =false;
 
 	ParticleSystem water;
 
@@ -81,10 +82,16 @@ public class PlayerController : MonoBehaviour
         HandleInteractionInput();
 
 		if (Input.GetButton("Fire1")) {
-            Debug.Log("Shoot");
-			water.Play();
+			if (!shooting) {
+				shooting = true;
+				Debug.Log("Shoot");
+				water.Play();
+			}
 		} else {
-			water.Stop();
+			if (shooting) {
+				shooting = false;
+				water.Stop();
+			}
 		}
     }
 
