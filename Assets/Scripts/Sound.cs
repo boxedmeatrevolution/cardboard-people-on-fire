@@ -20,10 +20,4 @@ public class Sound
 
     [HideInInspector]
     public AudioSource source;
-
-
-    [HideInInspector]
-    public bool isFade = false;
-    [HideInInspector]
-    public float targetVolume = 0f;
 }

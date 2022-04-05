@@ -21,17 +21,13 @@ public class FadeSoundCollider : MonoBehaviour
     {
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerStay(Collider other)
     {
-        if (other.GetComponentInParent<PlayerController>())
-        {
-        }
+        audioManager.currBgSound = clipName;
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.GetComponentInParent<PlayerController>())
-        {
-        }
+        audioManager.currBgSound = "city-music";
     }
 }

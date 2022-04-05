@@ -7,9 +7,7 @@ public class AudioManager : MonoBehaviour
     public Sound[] sounds;
     public float fadeSpeed = 1f / 5f;
 
-    string currBgSound;
-
-
+    public string currBgSound = "city-music";
 
     void Start() {
     }
@@ -29,16 +27,16 @@ public class AudioManager : MonoBehaviour
     {
         foreach (Sound s in sounds) 
         { 
-            if (s.isFade) 
-            {
-                float dir = s.source.volume < s.targetVolume ? 1 : -1;
+            if ((s.name == currBgSound && s.source.volume != s.defaultVolume) || s.source.volume != s.offVolume) {
+                float targetVolume = s.name == currBgSound ? s.defaultVolume : s.offVolume;
+                float dir = s.source.volume < targetVolume ? 1 : -1;
                 float newVolume = s.source.volume + Time.deltaTime * fadeSpeed * dir;
-                float newDir = newVolume < s.targetVolume ? 1 : -1;
+                float newDir = newVolume < targetVolume ? 1 : -1;
 
                 if (newDir != dir) { 
-                    newVolume = s.targetVolume;
-                    s.isFade = false;
+                    newVolume = targetVolume;
                 }
+
                 s.source.volume = newVolume;
             }
         }
